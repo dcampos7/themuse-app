@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <title>The Muse Job Map</title>
+    <style>
+      html, body, #map-canvas {
+        height: 100%;
+        margin: 0px;
+        padding: 0px
+      }
+    </style>
+    <link href="./css/style.css" rel="stylesheet" />
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=true"></script>
+
+    <script>
+      // Note: This example requires that you consent to location sharing when
+      // prompted by your browser. If you see a blank space instead of the map, this
+      // is probably because you have denied permission for location sharing.
+        
+      var map;
+
+      function initialize() {
+
+        var mapOptions = {
+          zoom: 12
+        };
+        map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+        // Try HTML5 geolocation
+        if(navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            var myPos = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+
+            // var your_infowindow = new google.maps.InfoWindow({
+            //   map: map,
+            //   position: pos,
+            //   content: 'You are currently here.'
+            // });
+
+            var marker = new google.maps.Marker({
+               map: map,
+               position: myPos,
+               icon: './img/blue_marker.png'
+            });
+
+            map.setCenter(myPos);
+          }, function() {
+            handleNoGeolocation(true);
+          });
+        } else {
+          // Browser doesn't support Geolocation
+          handleNoGeolocation(false);
+        }
+
+        $.get( "/locations", function( data ) {
+          var locations = JSON.parse(data);
+          locations.forEach(function(location) {
+            addMarker(location.lat, location.lng, location.google_city, location.muse_city);
+          });
+        });
+      }
+
+      function handleNoGeolocation(errorFlag) {
+        if (errorFlag) {
+          var content = 'Error: The Geolocation service failed.';
+        } else {
+          var content = 'Error: Your browser doesn\'t support geolocation.';
+        }
+
+        var options = {
+          map: map,
+          position: new google.maps.LatLng(60, 105),
+          content: content
+        };
+
+        var infowindow = new google.maps.InfoWindow(options);
+        map.setCenter(options.position);
+      }
+
+      function addMarker(lat, lng, google_city, muse_city) {
+        var pos = new google.maps.LatLng(lat, lng);
+
+        var marker = new google.maps.Marker({
+           map: map,
+           position: pos,
+           google_city: google_city,
+           muse_city: muse_city
+        });
+
+        google.maps.event.addListener(marker, 'click', addWindow);
+      }
+
+      function addWindow() {
+        var pos = this.position;
+        var content = '';
+
+        $.get( "/jobs?city="+this.muse_city, function( data ) {
+          var first = "first ";
+          var jobs = JSON.parse(data);
+          console.log(data);
+          jobs.forEach(function(job) {
+            console.log(job);
+            locations = categories = '';
+            job.locations.forEach(function(d) {
+              locations += d + ", ";
+            });
+            job.categories.forEach(function(d) {
+              categories += d + ", ";
+            });
+            locations = locations.substring(0, locations.length-2);
+            categories = categories.substring(0, categories.length-2);
+            content += '<div class="'+first+'job"><div class="title">'+job.title+'</div><div class="snapshot"><img src="'+job.company_snapshot+'"></div><div class="company">Company: '+job.company_name+'</div><div class="locations">Locations: '+locations+'</div><div class="categories">Categories: '+categories+'</div><div class="posted">Posted: '+job.posted+'</div><div class="apply"><a href="https://www.themuse.com'+job.apply_link+'">Apply</a></div></div>';
+            first = "";
+          });
+
+          var infowindow = new google.maps.InfoWindow({
+            map: map,
+            position: pos,
+            content: content
+          });
+        });
+      }
+
+      google.maps.event.addDomListener(window, 'load', initialize);
+
+    </script>
+  </head>
+  <body>
+    <div id="map-canvas"></div>
+  </body>
+</html>

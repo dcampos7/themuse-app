@@ -1,0 +1,11 @@
+{
+  "name": "themuse-app",
+  "description": "Final Round Project",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "url": "0.10.1",
+    "http": "0.0.0",
+    "mysql": "2.2.0"
+  }
+}

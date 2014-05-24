@@ -1,0 +1,23 @@
+.job {
+	min-height: 400px;
+	width: 300px;
+	padding: 10px 5px;
+	border-top:1px solid #DDD;
+	font-size: 11px;
+}
+
+.first {
+	border-top:0;
+}
+
+.job > div {
+	padding: 5px 0px;
+}
+
+.title {
+	font-size: 16px;
+}
+
+.snapshot img {
+	width: 290px;
+}
