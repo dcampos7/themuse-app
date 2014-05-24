@@ -2,12 +2,8 @@
 	min-height: 400px;
 	width: 300px;
 	padding: 10px 5px;
-	border-top:1px solid #DDD;
+	border-bottom:1px solid #DDD;
 	font-size: 11px;
-}
-
-.first {
-	border-top:0;
 }
 
 .job > div {
@@ -20,4 +16,30 @@
 
 .snapshot img {
 	width: 290px;
+}
+
+.pages {
+	font-size: 12px;
+	text-align: center;
+	padding-top: 5px;
+	width: 310px;
+}
+
+.pages div {
+	padding-top: 4px;
+	height:21px;
+	width:25px;
+	margin: 5px 5px;
+	border:1px solid #DDD;
+	border-radius: 50%;
+	display:inline-block;
+}
+
+.pages div.active {
+	background-color: #DDD;
+}
+
+.pages div:hover {
+	background-color: #CCC;
+	cursor: pointer;
 }

@@ -21,6 +21,7 @@
       // is probably because you have denied permission for location sharing.
         
       var map;
+      var infowindows = {};
 
       function initialize() {
 
@@ -93,34 +94,47 @@
         google.maps.event.addListener(marker, 'click', addWindow);
       }
 
+      function getJobs(data, city, page) {
+        var content = '';
+        var json = JSON.parse(data);
+        json.jobs.forEach(function(job) {
+          locations = categories = '';
+          job.locations.forEach(function(d) {
+            locations += d + ", ";
+          });
+          job.categories.forEach(function(d) {
+            categories += d + ", ";
+          });
+          locations = locations.substring(0, locations.length-2);
+          categories = categories.substring(0, categories.length-2);
+          content += '<div class="job"><div class="title">'+job.title+'</div><div class="snapshot"><img src="'+job.company_snapshot+'"></div><div class="company">Company: '+job.company_name+'</div><div class="locations">Locations: '+locations+'</div><div class="categories">Categories: '+categories+'</div><div class="posted">Posted: '+job.posted+'</div><div class="apply"><a href="https://www.themuse.com'+job.apply_link+'" target="_blank">Apply</a></div></div>';
+        });
+
+        content += '<div class="pages" data-city="'+city+'">';
+        for (var i=1; i<json.page_count+1; i++) {
+          active = page == i ? 'active' : '';
+          content += '<div class="'+active+'">'+i+'</div>';
+        }
+        content += '</div>';
+
+        return content;
+      }
+
       function addWindow() {
         var pos = this.position;
-        var content = '';
-
-        $.get( "/jobs?city="+this.muse_city, function( data ) {
-          var first = "first ";
-          var jobs = JSON.parse(data);
-          console.log(data);
-          jobs.forEach(function(job) {
-            console.log(job);
-            locations = categories = '';
-            job.locations.forEach(function(d) {
-              locations += d + ", ";
-            });
-            job.categories.forEach(function(d) {
-              categories += d + ", ";
-            });
-            locations = locations.substring(0, locations.length-2);
-            categories = categories.substring(0, categories.length-2);
-            content += '<div class="'+first+'job"><div class="title">'+job.title+'</div><div class="snapshot"><img src="'+job.company_snapshot+'"></div><div class="company">Company: '+job.company_name+'</div><div class="locations">Locations: '+locations+'</div><div class="categories">Categories: '+categories+'</div><div class="posted">Posted: '+job.posted+'</div><div class="apply"><a href="https://www.themuse.com'+job.apply_link+'" target="_blank">Apply</a></div></div>';
-            first = "";
-          });
-
-          var infowindow = new google.maps.InfoWindow({
+        var city = this.muse_city;
+        $.get( "/jobs?city="+city+"&page=1", function( data ) {
+          infowindows[city] = new google.maps.InfoWindow({
             map: map,
             position: pos,
-            content: content
+            content: getJobs(data, city, 1)
           });
+        });
+      }
+
+      function updateWindow(city, page) {
+        $.get( "/jobs?city="+city+"&page="+page, function( data ) {
+          infowindows[city].setContent(getJobs(data, city, page));
         });
       }
 
@@ -130,5 +144,10 @@
   </head>
   <body>
     <div id="map-canvas"></div>
+    <script>
+      $(document).on('click', '.pages div', function() {
+        updateWindow($(this).parent().attr('data-city'), $(this).text());
+      });
+    </script>
   </body>
 </html>

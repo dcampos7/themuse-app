@@ -33,54 +33,46 @@ function locations(request, response, connection) {
 function jobs(request, response, connection) {
 	var url_parts = url.parse(request.url, true);
 	var query = url_parts.query;
-	var output = '[';
 
-	function grabJobs(page) {
-		var options = {
-			host: 'www.themuse.com',
-			path: '/api/v1/jobs?page='+String(page)+'&job_location='+query.city.replace(/,/g,"%2C").replace(/ /g,"+")
-		}
-
-		// this actually sends the request and returns the data
-		var req = https.request(options, function (res) {
-			var data = '';
-		    res.on('data', function (chunk) {
-		        data += chunk;
-		    });
-		    res.on('end', function () {
-		    	json = JSON.parse(data);
-				json.results.forEach(function(job) {
-					locations = categories = '[';
-					job.locations.forEach(function(d) {
-						locations += '"' + String(d) + '",';
-					});
-					job.categories.forEach(function(d) {
-						categories += '"' + String(d) + '",';
-					});
-					locations = locations.substring(0, locations.length-1) + ']';
-					categories = categories.substring(0, categories.length-1) + ']';
-					output += '{"title": "' + job.title + '", "company_name": "' + job.company_name + '", "company_snapshot": "' + job.company_small_f1_image + '", "categories": ' + categories + ', "apply_link": "' + job.apply_link + '", "locations": ' + locations + ', "posted": "' + job.creation_date + '"},'
-				});
-				
-				if (page < json.page_count-1) {
-					grabJobs(page+1);
-				}
-				else {
-					output = output.substring(0, output.length-1) + ']';
-					response.write(output);
-					response.end();
-				}
-		    });
-		});
-
-		// check and report errors
-		req.on('error', function (e) {
-		    console.log(e.message);
-		});
-		req.end();
+	var options = {
+		host: 'www.themuse.com',
+		path: '/api/v1/jobs?page='+query.page+'&job_location='+query.city.replace(/,/g,"%2C").replace(/ /g,"+")
 	}
-	
-	grabJobs(1);
+
+	// this actually sends the request and returns the data
+	var req = https.request(options, function (res) {
+		var data = '';
+	    res.on('data', function (chunk) {
+	        data += chunk;
+	    });
+	    res.on('end', function () {
+	    	json = JSON.parse(data);
+
+	    	output = '{"page_count": '+ String(json.page_count-1) +', "jobs": [';
+			json.results.forEach(function(job) {
+				locations = categories = '[';
+				job.locations.forEach(function(d) {
+					locations += '"' + String(d) + '",';
+				});
+				job.categories.forEach(function(d) {
+					categories += '"' + String(d) + '",';
+				});
+				locations = locations.substring(0, locations.length-1) + ']';
+				categories = categories.substring(0, categories.length-1) + ']';
+				output += '{"title": "' + job.title + '", "company_name": "' + job.company_name + '", "company_snapshot": "' + job.company_small_f1_image + '", "categories": ' + categories + ', "apply_link": "' + job.apply_link + '", "locations": ' + locations + ', "posted": "' + job.creation_date + '"},'
+			});
+			output = output.substring(0, output.length-1) + ']}';
+			
+			response.write(output);
+			response.end();
+	    });
+	});
+
+	// check and report errors
+	req.on('error', function (e) {
+	    console.log(e.message);
+	});
+	req.end();
 }
 
 
