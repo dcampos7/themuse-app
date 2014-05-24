@@ -112,7 +112,7 @@
             });
             locations = locations.substring(0, locations.length-2);
             categories = categories.substring(0, categories.length-2);
-            content += '<div class="'+first+'job"><div class="title">'+job.title+'</div><div class="snapshot"><img src="'+job.company_snapshot+'"></div><div class="company">Company: '+job.company_name+'</div><div class="locations">Locations: '+locations+'</div><div class="categories">Categories: '+categories+'</div><div class="posted">Posted: '+job.posted+'</div><div class="apply"><a href="https://www.themuse.com'+job.apply_link+'">Apply</a></div></div>';
+            content += '<div class="'+first+'job"><div class="title">'+job.title+'</div><div class="snapshot"><img src="'+job.company_snapshot+'"></div><div class="company">Company: '+job.company_name+'</div><div class="locations">Locations: '+locations+'</div><div class="categories">Categories: '+categories+'</div><div class="posted">Posted: '+job.posted+'</div><div class="apply"><a href="https://www.themuse.com'+job.apply_link+'" target="_blank">Apply</a></div></div>';
             first = "";
           });
 
